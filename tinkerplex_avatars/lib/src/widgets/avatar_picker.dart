@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:shimmer/shimmer.dart';
 import 'user_avatar.dart';
 import '../config/avatar_styles.dart';
 
-/// Widget for selecting an avatar style from available options
-class AvatarPicker extends StatelessWidget {
+/// Widget for selecting an avatar from a grid-based browser with style tabs
+class AvatarPicker extends StatefulWidget {
   /// Currently selected style ID
   final String currentStyle;
 
@@ -13,10 +14,10 @@ class AvatarPicker extends StatelessWidget {
   /// Called when user selects a different style
   final ValueChanged<String> onStyleChanged;
 
-  /// Called when user wants to randomize the seed
-  final VoidCallback? onRandomizeSeed;
+  /// Called when user selects a different seed
+  final ValueChanged<String> onSeedChanged;
 
-  /// Size of each avatar preview
+  /// Size of each avatar in the grid
   final double avatarSize;
 
   const AvatarPicker({
@@ -24,61 +25,42 @@ class AvatarPicker extends StatelessWidget {
     required this.currentStyle,
     required this.seed,
     required this.onStyleChanged,
-    this.onRandomizeSeed,
-    this.avatarSize = 64,
+    required this.onSeedChanged,
+    this.avatarSize = 56,
   });
 
   @override
+  State<AvatarPicker> createState() => _AvatarPickerState();
+}
+
+class _AvatarPickerState extends State<AvatarPicker> {
+  @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
       children: [
-        // Current avatar with randomize button
-        Row(
-          children: [
-            UserAvatar(
-              seed: seed,
-              style: currentStyle,
-              size: avatarSize * 1.5,
-            ),
-            const SizedBox(width: 16),
-            if (onRandomizeSeed != null)
-              FilledButton.tonalIcon(
-                onPressed: onRandomizeSeed,
-                icon: const Icon(Icons.shuffle),
-                label: const Text('Randomize'),
-              ),
-          ],
+        _StyleTabBar(
+          currentStyle: widget.currentStyle,
+          onStyleChanged: widget.onStyleChanged,
         ),
         const SizedBox(height: 16),
-
-        // Style selection label
-        Text(
-          'Choose Style',
-          style: Theme.of(context).textTheme.titleSmall,
-        ),
-        const SizedBox(height: 8),
-
-        // Horizontal scrollable list of styles
-        SizedBox(
-          height: avatarSize + 32,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            itemCount: availableAvatarStyles.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 12),
-            itemBuilder: (context, index) {
-              final style = availableAvatarStyles[index];
-              final isSelected = style.id == currentStyle;
-
-              return _AvatarStyleOption(
-                style: style,
-                seed: seed,
-                size: avatarSize,
-                isSelected: isSelected,
-                onTap: () => onStyleChanged(style.id),
-              );
-            },
+        AnimatedSwitcher(
+          duration: const Duration(milliseconds: 300),
+          switchInCurve: Curves.easeIn,
+          switchOutCurve: Curves.easeOut,
+          transitionBuilder: (child, animation) {
+            return FadeTransition(
+              opacity: animation,
+              child: child,
+            );
+          },
+          child: _AvatarGridView(
+            key: ValueKey(widget.currentStyle),
+            currentStyle: widget.currentStyle,
+            selectedSeed: widget.seed,
+            onSeedChanged: widget.onSeedChanged,
+            avatarSize: widget.avatarSize,
           ),
         ),
       ],
@@ -86,17 +68,42 @@ class AvatarPicker extends StatelessWidget {
   }
 }
 
-class _AvatarStyleOption extends StatelessWidget {
+class _StyleTabBar extends StatelessWidget {
+  final String currentStyle;
+  final ValueChanged<String> onStyleChanged;
+
+  const _StyleTabBar({
+    required this.currentStyle,
+    required this.onStyleChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: availableAvatarStyles.map((style) {
+            final isSelected = style.id == currentStyle;
+            return _StyleTab(
+              style: style,
+              isSelected: isSelected,
+              onTap: () => onStyleChanged(style.id),
+            );
+          }).toList(),
+        );
+      },
+    );
+  }
+}
+
+class _StyleTab extends StatelessWidget {
   final AvatarStyleInfo style;
-  final String seed;
-  final double size;
   final bool isSelected;
   final VoidCallback onTap;
 
-  const _AvatarStyleOption({
+  const _StyleTab({
     required this.style,
-    required this.seed,
-    required this.size,
     required this.isSelected,
     required this.onTap,
   });
@@ -107,38 +114,152 @@ class _AvatarStyleOption extends StatelessWidget {
 
     return GestureDetector(
       onTap: onTap,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            padding: const EdgeInsets.all(4),
-            decoration: BoxDecoration(
-              border: Border.all(
-                color: isSelected
-                    ? theme.colorScheme.primary
-                    : Colors.transparent,
-                width: 3,
+      child: Transform.scale(
+        scale: isSelected ? 1.05 : 1.0,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: isSelected ? theme.colorScheme.primary : Colors.transparent,
+              width: 2,
+            ),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              UserAvatar(
+                seed: avatarSeeds[0],
+                style: style.id,
+                size: 32,
               ),
-              borderRadius: BorderRadius.circular(size / 2 + 4),
-            ),
-            child: UserAvatar(
-              seed: seed,
-              style: style.id,
-              size: size,
-            ),
+              const SizedBox(height: 4),
+              Text(
+                style.name,
+                style: theme.textTheme.labelSmall?.copyWith(
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                  color: isSelected
+                      ? theme.colorScheme.primary
+                      : theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 4),
-          Text(
-            style.name,
-            style: theme.textTheme.labelSmall?.copyWith(
-              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-              color: isSelected
-                  ? theme.colorScheme.primary
-                  : theme.colorScheme.onSurfaceVariant,
-            ),
+        ),
+      ),
+    );
+  }
+}
+
+class _AvatarGridView extends StatelessWidget {
+  final String currentStyle;
+  final String selectedSeed;
+  final ValueChanged<String> onSeedChanged;
+  final double avatarSize;
+
+  const _AvatarGridView({
+    super.key,
+    required this.currentStyle,
+    required this.selectedSeed,
+    required this.onSeedChanged,
+    required this.avatarSize,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Wrap(
+        spacing: 12,
+        runSpacing: 12,
+        alignment: WrapAlignment.center,
+        children: avatarSeeds.map((seed) {
+          return _AvatarGridItem(
+            seed: seed,
+            styleId: currentStyle,
+            isSelected: seed == selectedSeed,
+            onTap: () {
+              if (seed != selectedSeed) {
+                onSeedChanged(seed);
+              }
+            },
+            size: avatarSize,
+          );
+        }).toList(),
+      ),
+    );
+  }
+}
+
+class _AvatarGridItem extends StatelessWidget {
+  final String seed;
+  final String styleId;
+  final bool isSelected;
+  final VoidCallback onTap;
+  final double size;
+
+  const _AvatarGridItem({
+    required this.seed,
+    required this.styleId,
+    required this.isSelected,
+    required this.onTap,
+    required this.size,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(3),
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: isSelected
+                ? theme.colorScheme.primary
+                : theme.colorScheme.outline.withValues(alpha: 0.3),
+            width: isSelected ? 3 : 1,
           ),
-        ],
+        ),
+        child: UserAvatar(
+          seed: seed,
+          style: styleId,
+          size: size,
+          placeholder: _ShimmerCircle(size: size),
+        ),
+      ),
+    );
+  }
+}
+
+class _ShimmerCircle extends StatelessWidget {
+  final double size;
+
+  const _ShimmerCircle({required this.size});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Shimmer.fromColors(
+      baseColor: theme.colorScheme.surfaceContainerHighest,
+      highlightColor: theme.colorScheme.surface,
+      child: Container(
+        width: size,
+        height: size,
+        decoration: const BoxDecoration(
+          shape: BoxShape.circle,
+          color: Colors.white,
+        ),
       ),
     );
   }

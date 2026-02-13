@@ -93,12 +93,6 @@ class _ProfileEditorState extends State<ProfileEditor> {
     }
   }
 
-  void _randomizeSeed() {
-    setState(() {
-      _avatarSeed = widget.profileService.generateRandomSeed();
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -167,7 +161,11 @@ class _ProfileEditorState extends State<ProfileEditor> {
                     _avatarStyle = style;
                   });
                 },
-                onRandomizeSeed: _randomizeSeed,
+                onSeedChanged: (seed) {
+                  setState(() {
+                    _avatarSeed = seed;
+                  });
+                },
                 avatarSize: 56,
               ),
             ),

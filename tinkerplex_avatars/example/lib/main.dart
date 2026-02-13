@@ -87,9 +87,9 @@ class _ExampleHomeState extends State<ExampleHome> {
                   _currentStyle = style;
                 });
               },
-              onRandomizeSeed: () {
+              onSeedChanged: (seed) {
                 setState(() {
-                  _currentSeed = DateTime.now().millisecondsSinceEpoch.toString();
+                  _currentSeed = seed;
                 });
               },
             ),
