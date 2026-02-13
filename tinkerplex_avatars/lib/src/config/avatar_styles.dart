@@ -49,6 +49,13 @@ const List<AvatarStyleInfo> availableAvatarStyles = [
     creator: 'The Visual Team',
   ),
   AvatarStyleInfo(
+    id: 'lorelei',
+    name: 'Lorelei',
+    description: 'Minimalist line-art faces',
+    license: 'CC0',
+    creator: 'Lisa Wischofsky',
+  ),
+  AvatarStyleInfo(
     id: 'pixel-art',
     name: 'Pixel Art',
     description: 'Retro pixel characters',
