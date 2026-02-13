@@ -79,20 +79,17 @@ class _StyleTabBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: availableAvatarStyles.map((style) {
-            final isSelected = style.id == currentStyle;
-            return _StyleTab(
-              style: style,
-              isSelected: isSelected,
-              onTap: () => onStyleChanged(style.id),
-            );
-          }).toList(),
+    return Row(
+      children: availableAvatarStyles.map((style) {
+        final isSelected = style.id == currentStyle;
+        return Expanded(
+          child: _StyleTab(
+            style: style,
+            isSelected: isSelected,
+            onTap: () => onStyleChanged(style.id),
+          ),
         );
-      },
+      }).toList(),
     );
   }
 }
@@ -118,7 +115,7 @@ class _StyleTab extends StatelessWidget {
         scale: isSelected ? 1.05 : 1.0,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.all(8),
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
           decoration: BoxDecoration(
             border: Border.all(
               color: isSelected ? theme.colorScheme.primary : Colors.transparent,
@@ -132,17 +129,20 @@ class _StyleTab extends StatelessWidget {
               UserAvatar(
                 seed: avatarSeeds[0],
                 style: style.id,
-                size: 32,
+                size: 28,
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 2),
               Text(
                 style.name,
                 style: theme.textTheme.labelSmall?.copyWith(
+                  fontSize: 9,
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                   color: isSelected
                       ? theme.colorScheme.primary
                       : theme.colorScheme.onSurfaceVariant,
                 ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ],
           ),
