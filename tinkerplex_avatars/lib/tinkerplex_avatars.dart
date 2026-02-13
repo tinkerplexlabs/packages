@@ -14,3 +14,4 @@ export 'src/models/user_profile.dart';
 
 // Config
 export 'src/config/avatar_styles.dart';
+export 'src/config/licenses.dart';

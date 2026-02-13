@@ -5,7 +5,7 @@ Shared avatar and profile system for TinkerPlex Labs games. Provides consistent 
 ## Features
 
 - **Shared Identity**: Same avatar and display name across all TinkerPlex games
-- **DiceBear Integration**: CC0-licensed avatar styles (free for commercial use)
+- **DiceBear Integration**: DiceBear-powered avatar styles with proper licensing
 - **Easy Integration**: Add to any Flutter app in minutes
 - **Customizable**: Users can choose styles and randomize their avatar
 
@@ -35,6 +35,9 @@ void main() async {
     url: 'YOUR_SUPABASE_URL',
     anonKey: 'YOUR_ANON_KEY',
   );
+
+  // Register CC BY 4.0 licenses for avatar styles
+  registerAvatarLicenses();
 
   // Create profile service using existing Supabase client
   final profileService = TinkerPlexProfileService(
@@ -102,8 +105,8 @@ Display a DiceBear avatar.
 // Basic usage
 UserAvatar(
   seed: 'unique-seed-string',
-  style: 'pixel-art',  // optional, defaults to pixel-art
-  size: 48,            // optional, defaults to 48
+  style: 'adventurer',  // optional, defaults to adventurer
+  size: 48,             // optional, defaults to 48
 )
 
 // From a UserProfile
@@ -116,7 +119,7 @@ Let users choose avatar style and randomize.
 
 ```dart
 AvatarPicker(
-  currentStyle: 'pixel-art',
+  currentStyle: 'adventurer',
   seed: 'current-seed',
   onStyleChanged: (newStyle) {
     // User selected a different style
@@ -166,7 +169,7 @@ final profiles = await service.getProfiles([userId1, userId2]);
 // Update current user's profile
 await service.updateProfile(
   displayName: 'NewName',
-  avatarStyle: 'lorelei',
+  avatarStyle: 'adventurer',
   avatarSeed: 'new-seed',
 );
 
@@ -189,17 +192,33 @@ class UserProfile {
 
 ## Available Avatar Styles
 
-All styles are CC0-licensed (free for commercial use, no attribution required):
+Styles use a mix of CC0 and CC BY 4.0 licenses:
 
-| Style ID | Name | Description |
-|----------|------|-------------|
-| `pixel-art` | Pixel Art | Retro pixel characters |
-| `lorelei` | Lorelei | Cute illustrated faces |
-| `thumbs` | Thumbs | Simple thumb characters |
-| `avataaars` | Avataaars | Cartoon people |
-| `bottts` | Bottts | Friendly robots |
-| `initials` | Initials | Letters on colored background |
-| `shapes` | Shapes | Abstract geometric |
+| Style ID | Name | License | Creator |
+|----------|------|---------|---------|
+| `adventurer` | Adventurer | CC BY 4.0 | Lisa Wischofsky |
+| `fun-emoji` | Fun Emoji | CC BY 4.0 | Davis Uche |
+| `big-ears` | Big Ears | CC BY 4.0 | The Visual Team |
+| `pixel-art` | Pixel Art | CC0 | DiceBear |
+| `bottts` | Bottts | Free | Pablo Stanley |
+| `thumbs` | Thumbs | CC0 | DiceBear |
+
+### License Attribution
+
+Three styles require CC BY 4.0 attribution. The package provides a `registerAvatarLicenses()` function that registers these with Flutter's built-in license system. Call it in your app's `main()`:
+
+```dart
+import 'package:tinkerplex_avatars/tinkerplex_avatars.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  registerAvatarLicenses(); // Register CC BY 4.0 attribution
+  // ... rest of init
+  runApp(MyApp());
+}
+```
+
+Users can view attribution via `showLicensePage()` (standard Flutter pattern).
 
 ## Database Requirements
 
@@ -207,7 +226,7 @@ The package expects these columns on the `users` table:
 
 ```sql
 display_name TEXT,
-avatar_style TEXT DEFAULT 'pixel-art',
+avatar_style TEXT DEFAULT 'adventurer',
 avatar_seed TEXT
 ```
 
@@ -216,7 +235,7 @@ Run this migration if columns don't exist:
 ```sql
 ALTER TABLE users
 ADD COLUMN IF NOT EXISTS display_name TEXT,
-ADD COLUMN IF NOT EXISTS avatar_style TEXT DEFAULT 'pixel-art',
+ADD COLUMN IF NOT EXISTS avatar_style TEXT DEFAULT 'adventurer',
 ADD COLUMN IF NOT EXISTS avatar_seed TEXT;
 
 UPDATE users SET avatar_seed = id::text WHERE avatar_seed IS NULL;
@@ -230,7 +249,7 @@ Update your leaderboard query to include avatar fields:
 SELECT
   u.id,
   COALESCE(u.display_name, 'Player') as display_name,
-  COALESCE(u.avatar_style, 'pixel-art') as avatar_style,
+  COALESCE(u.avatar_style, 'adventurer') as avatar_style,
   COALESCE(u.avatar_seed, u.id::text) as avatar_seed,
   -- ... other leaderboard fields
 FROM leaderboard_stats ls
@@ -251,7 +270,7 @@ class LeaderboardEntry {
     return LeaderboardEntry(
       userId: json['user_id'],
       displayName: json['display_name'] ?? 'Player',
-      avatarStyle: json['avatar_style'] ?? 'pixel-art',
+      avatarStyle: json['avatar_style'] ?? 'adventurer',
       avatarSeed: json['avatar_seed'] ?? json['user_id'],
       // ... other fields
     );
@@ -292,4 +311,4 @@ DiceBear generates avatars deterministically from the seed. If you change the se
 
 ## License
 
-This package is proprietary to TinkerPlex Labs. The DiceBear avatar styles used are CC0-licensed (public domain).
+This package is proprietary to TinkerPlex Labs. DiceBear avatar styles are used under CC0 and CC BY 4.0 licenses. See `registerAvatarLicenses()` for attribution details.
