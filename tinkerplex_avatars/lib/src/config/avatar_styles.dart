@@ -9,35 +9,50 @@ class AvatarStyleInfo {
   /// Brief description of the style
   final String description;
 
+  /// License type (e.g., 'CC0' or 'CC BY 4.0')
+  final String? license;
+
+  /// Creator name for attribution
+  final String? creator;
+
   const AvatarStyleInfo({
     required this.id,
     required this.name,
     required this.description,
+    this.license,
+    this.creator,
   });
 }
 
-/// Available CC0-licensed avatar styles from DiceBear
-/// These styles are completely free for commercial use with no attribution required
+/// Available avatar styles from DiceBear
+/// Mix of CC0 (public domain) and CC BY 4.0 (attribution required) licenses
 const List<AvatarStyleInfo> availableAvatarStyles = [
+  AvatarStyleInfo(
+    id: 'adventurer',
+    name: 'Adventurer',
+    description: 'Illustrated adventurer faces',
+    license: 'CC BY 4.0',
+    creator: 'Lisa Wischofsky',
+  ),
+  AvatarStyleInfo(
+    id: 'fun-emoji',
+    name: 'Fun Emoji',
+    description: 'Playful emoji characters',
+    license: 'CC BY 4.0',
+    creator: 'Davis Uche',
+  ),
+  AvatarStyleInfo(
+    id: 'big-ears',
+    name: 'Big Ears',
+    description: 'Characters with big ears',
+    license: 'CC BY 4.0',
+    creator: 'The Visual Team',
+  ),
   AvatarStyleInfo(
     id: 'pixel-art',
     name: 'Pixel Art',
     description: 'Retro pixel characters',
-  ),
-  AvatarStyleInfo(
-    id: 'lorelei',
-    name: 'Lorelei',
-    description: 'Cute illustrated faces',
-  ),
-  AvatarStyleInfo(
-    id: 'thumbs',
-    name: 'Thumbs',
-    description: 'Simple thumb characters',
-  ),
-  AvatarStyleInfo(
-    id: 'avataaars',
-    name: 'Avataaars',
-    description: 'Cartoon people',
+    license: 'CC0',
   ),
   AvatarStyleInfo(
     id: 'bottts',
@@ -45,19 +60,15 @@ const List<AvatarStyleInfo> availableAvatarStyles = [
     description: 'Friendly robots',
   ),
   AvatarStyleInfo(
-    id: 'initials',
-    name: 'Initials',
-    description: 'Letters on colored background',
-  ),
-  AvatarStyleInfo(
-    id: 'shapes',
-    name: 'Shapes',
-    description: 'Abstract geometric',
+    id: 'thumbs',
+    name: 'Thumbs',
+    description: 'Simple thumb characters',
+    license: 'CC0',
   ),
 ];
 
 /// Default avatar style
-const String defaultAvatarStyle = 'pixel-art';
+const String defaultAvatarStyle = 'adventurer';
 
 /// Get avatar style info by ID
 AvatarStyleInfo? getAvatarStyleInfo(String styleId) {

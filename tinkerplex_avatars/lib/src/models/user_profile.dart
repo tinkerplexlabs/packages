@@ -15,7 +15,7 @@ class UserProfile {
   const UserProfile({
     required this.id,
     this.displayName,
-    this.avatarStyle = 'pixel-art',
+    this.avatarStyle = 'adventurer',
     required this.avatarSeed,
   });
 
@@ -28,7 +28,7 @@ class UserProfile {
     return UserProfile(
       id: id,
       displayName: json['display_name'] as String?,
-      avatarStyle: (json['avatar_style'] as String?) ?? 'pixel-art',
+      avatarStyle: (json['avatar_style'] as String?) ?? 'adventurer',
       avatarSeed: (json['avatar_seed'] as String?) ?? id,
     );
   }
