@@ -136,14 +136,13 @@ class _ProfileSetupWizardState extends State<ProfileSetupWizard> {
   }
 
   Widget _buildAvatarSelectionCard() {
-    return Center(
+    return Padding(
+      padding: const EdgeInsets.all(16),
       child: Card(
         elevation: 2,
-        margin: const EdgeInsets.all(24),
         child: Padding(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(16),
           child: Column(
-            mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // Title
@@ -160,7 +159,7 @@ class _ProfileSetupWizardState extends State<ProfileSetupWizard> {
                     ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
 
               // Avatar picker
               Expanded(
@@ -182,7 +181,7 @@ class _ProfileSetupWizardState extends State<ProfileSetupWizard> {
                   ),
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
 
               // Navigation buttons
               Row(
@@ -209,81 +208,90 @@ class _ProfileSetupWizardState extends State<ProfileSetupWizard> {
   }
 
   Widget _buildDisplayNameCard() {
-    return Center(
+    return Padding(
+      padding: const EdgeInsets.all(16),
       child: Card(
         elevation: 2,
-        margin: const EdgeInsets.all(24),
         child: Padding(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(16),
           child: Column(
-            mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Title
-              Text(
-                'What should we call you?',
-                style: Theme.of(context).textTheme.headlineMedium,
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'This name will appear on leaderboards',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 24),
+              // Scrollable content area (handles keyboard resize)
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // Title
+                      Text(
+                        'What should we call you?',
+                        style: Theme.of(context).textTheme.headlineMedium,
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'This name will appear on leaderboards',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 24),
 
-              // Avatar preview
-              Center(
-                child: UserAvatar(
-                  seed: _selectedSeed,
-                  style: _selectedStyle,
-                  size: 80,
-                ),
-              ),
-              const SizedBox(height: 24),
+                      // Avatar preview
+                      Center(
+                        child: UserAvatar(
+                          seed: _selectedSeed,
+                          style: _selectedStyle,
+                          size: 80,
+                        ),
+                      ),
+                      const SizedBox(height: 24),
 
-              // Display name field
-              Form(
-                key: _formKey,
-                child: TextFormField(
-                  controller: _displayNameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Display Name',
-                    hintText: 'Enter your display name',
-                    border: OutlineInputBorder(),
+                      // Display name field
+                      Form(
+                        key: _formKey,
+                        child: TextFormField(
+                          controller: _displayNameController,
+                          decoration: const InputDecoration(
+                            labelText: 'Display Name',
+                            hintText: 'Enter your display name',
+                            border: OutlineInputBorder(),
+                          ),
+                          textCapitalization: TextCapitalization.words,
+                          maxLength: 30,
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return 'Please enter a display name';
+                            }
+                            return null;
+                          },
+                          onChanged: (_) => setState(() {}),
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+
+                      // Leaderboard preview section
+                      Text(
+                        'Leaderboard Preview',
+                        style: Theme.of(context).textTheme.titleSmall,
+                      ),
+                      const SizedBox(height: 8),
+                      LeaderboardPreview(
+                        displayName: _displayNameController.text.trim().isEmpty
+                            ? 'Player'
+                            : _displayNameController.text.trim(),
+                        avatarSeed: _selectedSeed,
+                        avatarStyle: _selectedStyle,
+                      ),
+                    ],
                   ),
-                  textCapitalization: TextCapitalization.words,
-                  maxLength: 30,
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'Please enter a display name';
-                    }
-                    return null;
-                  },
-                  onChanged: (_) => setState(() {}),
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
 
-              // Leaderboard preview section
-              Text(
-                'Leaderboard Preview',
-                style: Theme.of(context).textTheme.titleSmall,
-              ),
-              const SizedBox(height: 8),
-              LeaderboardPreview(
-                displayName: _displayNameController.text.trim().isEmpty
-                    ? 'Player'
-                    : _displayNameController.text.trim(),
-                avatarSeed: _selectedSeed,
-                avatarStyle: _selectedStyle,
-              ),
-              const SizedBox(height: 24),
-
-              // Navigation buttons
+              // Navigation buttons (pinned at bottom)
               Row(
                 children: [
                   // Back button
