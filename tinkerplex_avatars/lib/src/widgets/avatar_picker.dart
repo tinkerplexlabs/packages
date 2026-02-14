@@ -34,15 +34,38 @@ class AvatarPicker extends StatefulWidget {
 }
 
 class _AvatarPickerState extends State<AvatarPicker> {
+  late String _browsingStyle;
+
+  @override
+  void initState() {
+    super.initState();
+    _browsingStyle = widget.currentStyle;
+  }
+
+  @override
+  void didUpdateWidget(AvatarPicker oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.currentStyle != widget.currentStyle) {
+      _browsingStyle = widget.currentStyle;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    // Only show selection highlight when browsing the committed style's tab
+    final bool isBrowsingSelectedStyle = _browsingStyle == widget.currentStyle;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
       children: [
         _StyleTabBar(
-          currentStyle: widget.currentStyle,
-          onStyleChanged: widget.onStyleChanged,
+          currentStyle: _browsingStyle,
+          onStyleChanged: (style) {
+            setState(() {
+              _browsingStyle = style;
+            });
+          },
         ),
         const SizedBox(height: 16),
         AnimatedSwitcher(
@@ -56,10 +79,13 @@ class _AvatarPickerState extends State<AvatarPicker> {
             );
           },
           child: _AvatarGridView(
-            key: ValueKey(widget.currentStyle),
-            currentStyle: widget.currentStyle,
-            selectedSeed: widget.seed,
-            onSeedChanged: widget.onSeedChanged,
+            key: ValueKey(_browsingStyle),
+            currentStyle: _browsingStyle,
+            selectedSeed: isBrowsingSelectedStyle ? widget.seed : null,
+            onSeedChanged: (seed) {
+              widget.onStyleChanged(_browsingStyle);
+              widget.onSeedChanged(seed);
+            },
             avatarSize: widget.avatarSize,
           ),
         ),
@@ -154,7 +180,7 @@ class _StyleTab extends StatelessWidget {
 
 class _AvatarGridView extends StatelessWidget {
   final String currentStyle;
-  final String selectedSeed;
+  final String? selectedSeed;
   final ValueChanged<String> onSeedChanged;
   final double avatarSize;
 
@@ -185,11 +211,7 @@ class _AvatarGridView extends StatelessWidget {
             seed: seed,
             styleId: currentStyle,
             isSelected: seed == selectedSeed,
-            onTap: () {
-              if (seed != selectedSeed) {
-                onSeedChanged(seed);
-              }
-            },
+            onTap: () => onSeedChanged(seed),
             size: avatarSize,
           );
         }).toList(),
