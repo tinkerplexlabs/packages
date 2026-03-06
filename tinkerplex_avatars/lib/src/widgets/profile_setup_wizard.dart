@@ -84,6 +84,33 @@ class _ProfileSetupWizardState extends State<ProfileSetupWizard> {
     }
   }
 
+  Future<void> _skipWithDefaults() async {
+    if (_isSaving) return;
+
+    setState(() => _isSaving = true);
+
+    final success = await widget.profileService.updateProfile(
+      displayName: 'Player',
+      avatarStyle: _selectedStyle,
+      avatarSeed: _selectedSeed,
+    );
+
+    if (!mounted) return;
+
+    setState(() => _isSaving = false);
+
+    if (success) {
+      widget.onCompleted();
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Failed to save profile. Please try again.'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
   Future<void> _completeSetup() async {
     if (_isSaving) return;
 
@@ -186,12 +213,11 @@ class _ProfileSetupWizardState extends State<ProfileSetupWizard> {
               // Navigation buttons
               Row(
                 children: [
-                  // Skip button (if cancellation is allowed)
-                  if (widget.onCancelled != null)
-                    TextButton(
-                      onPressed: widget.onCancelled,
-                      child: const Text('Skip'),
-                    ),
+                  // Skip button — advances with default avatar
+                  TextButton(
+                    onPressed: _goToNextPage,
+                    child: const Text('Skip'),
+                  ),
                   const Spacer(),
                   // Next button
                   FilledButton(
@@ -298,6 +324,11 @@ class _ProfileSetupWizardState extends State<ProfileSetupWizard> {
                   TextButton(
                     onPressed: _goToPreviousPage,
                     child: const Text('Back'),
+                  ),
+                  // Skip button — saves with default name "Player"
+                  TextButton(
+                    onPressed: _isSaving ? null : _skipWithDefaults,
+                    child: const Text('Skip'),
                   ),
                   const Spacer(),
                   // Complete button
