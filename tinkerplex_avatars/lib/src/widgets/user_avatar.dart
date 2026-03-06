@@ -20,6 +20,11 @@ class UserAvatar extends StatelessWidget {
   /// Optional border radius (defaults to circular)
   final BorderRadius? borderRadius;
 
+  /// Optional base path for bundled SVG assets.
+  /// When provided and the seed is a preset seed, loads from
+  /// `$assetBasePath/$style/$seed.svg` instead of the network.
+  final String? assetBasePath;
+
   /// Create an avatar with explicit values
   const UserAvatar({
     super.key,
@@ -28,6 +33,7 @@ class UserAvatar extends StatelessWidget {
     this.size = 48,
     this.placeholder,
     this.borderRadius,
+    this.assetBasePath,
   });
 
   /// Create an avatar from a UserProfile
@@ -37,6 +43,7 @@ class UserAvatar extends StatelessWidget {
     double size = 48,
     Widget? placeholder,
     BorderRadius? borderRadius,
+    String? assetBasePath,
   }) {
     return UserAvatar(
       key: key,
@@ -45,8 +52,13 @@ class UserAvatar extends StatelessWidget {
       size: size,
       placeholder: placeholder,
       borderRadius: borderRadius,
+      assetBasePath: assetBasePath,
     );
   }
+
+  /// Whether this avatar can be loaded from bundled assets
+  bool get _canLoadFromAsset =>
+      assetBasePath != null && avatarSeeds.contains(seed);
 
   /// Get the DiceBear URL for this avatar
   String get avatarUrl =>
@@ -61,14 +73,21 @@ class UserAvatar extends StatelessWidget {
       child: SizedBox(
         width: size,
         height: size,
-        child: SvgPicture.network(
-          avatarUrl,
-          width: size,
-          height: size,
-          placeholderBuilder: (context) =>
-              placeholder ?? _buildPlaceholder(context),
-          fit: BoxFit.cover,
-        ),
+        child: _canLoadFromAsset
+            ? SvgPicture.asset(
+                '$assetBasePath/$style/$seed.svg',
+                width: size,
+                height: size,
+                fit: BoxFit.cover,
+              )
+            : SvgPicture.network(
+                avatarUrl,
+                width: size,
+                height: size,
+                placeholderBuilder: (context) =>
+                    placeholder ?? _buildPlaceholder(context),
+                fit: BoxFit.cover,
+              ),
       ),
     );
   }

@@ -20,6 +20,9 @@ class AvatarPicker extends StatefulWidget {
   /// Size of each avatar in the grid
   final double avatarSize;
 
+  /// Optional base path for bundled SVG assets (offline support)
+  final String? assetBasePath;
+
   const AvatarPicker({
     super.key,
     required this.currentStyle,
@@ -27,6 +30,7 @@ class AvatarPicker extends StatefulWidget {
     required this.onStyleChanged,
     required this.onSeedChanged,
     this.avatarSize = 56,
+    this.assetBasePath,
   });
 
   @override
@@ -66,6 +70,7 @@ class _AvatarPickerState extends State<AvatarPicker> {
               _browsingStyle = style;
             });
           },
+          assetBasePath: widget.assetBasePath,
         ),
         const SizedBox(height: 16),
         AnimatedSwitcher(
@@ -87,6 +92,7 @@ class _AvatarPickerState extends State<AvatarPicker> {
               widget.onSeedChanged(seed);
             },
             avatarSize: widget.avatarSize,
+            assetBasePath: widget.assetBasePath,
           ),
         ),
       ],
@@ -97,10 +103,12 @@ class _AvatarPickerState extends State<AvatarPicker> {
 class _StyleTabBar extends StatelessWidget {
   final String currentStyle;
   final ValueChanged<String> onStyleChanged;
+  final String? assetBasePath;
 
   const _StyleTabBar({
     required this.currentStyle,
     required this.onStyleChanged,
+    this.assetBasePath,
   });
 
   @override
@@ -113,6 +121,7 @@ class _StyleTabBar extends StatelessWidget {
             style: style,
             isSelected: isSelected,
             onTap: () => onStyleChanged(style.id),
+            assetBasePath: assetBasePath,
           ),
         );
       }).toList(),
@@ -124,11 +133,13 @@ class _StyleTab extends StatelessWidget {
   final AvatarStyleInfo style;
   final bool isSelected;
   final VoidCallback onTap;
+  final String? assetBasePath;
 
   const _StyleTab({
     required this.style,
     required this.isSelected,
     required this.onTap,
+    this.assetBasePath,
   });
 
   @override
@@ -156,6 +167,7 @@ class _StyleTab extends StatelessWidget {
                 seed: avatarSeeds[0],
                 style: style.id,
                 size: 28,
+                assetBasePath: assetBasePath,
               ),
               const SizedBox(height: 2),
               Text(
@@ -183,6 +195,7 @@ class _AvatarGridView extends StatelessWidget {
   final String? selectedSeed;
   final ValueChanged<String> onSeedChanged;
   final double avatarSize;
+  final String? assetBasePath;
 
   const _AvatarGridView({
     super.key,
@@ -190,6 +203,7 @@ class _AvatarGridView extends StatelessWidget {
     required this.selectedSeed,
     required this.onSeedChanged,
     required this.avatarSize,
+    this.assetBasePath,
   });
 
   @override
@@ -213,6 +227,7 @@ class _AvatarGridView extends StatelessWidget {
             isSelected: seed == selectedSeed,
             onTap: () => onSeedChanged(seed),
             size: avatarSize,
+            assetBasePath: assetBasePath,
           );
         }).toList(),
       ),
@@ -226,6 +241,7 @@ class _AvatarGridItem extends StatelessWidget {
   final bool isSelected;
   final VoidCallback onTap;
   final double size;
+  final String? assetBasePath;
 
   const _AvatarGridItem({
     required this.seed,
@@ -233,6 +249,7 @@ class _AvatarGridItem extends StatelessWidget {
     required this.isSelected,
     required this.onTap,
     required this.size,
+    this.assetBasePath,
   });
 
   @override
@@ -257,6 +274,7 @@ class _AvatarGridItem extends StatelessWidget {
           style: styleId,
           size: size,
           placeholder: _ShimmerCircle(size: size),
+          assetBasePath: assetBasePath,
         ),
       ),
     );
